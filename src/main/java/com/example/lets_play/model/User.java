@@ -1,4 +1,4 @@
-package com.example.letsplay.model;
+package com.example.lets_play.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,7 +9,7 @@ public class User {
   private String id;
   private String username;
   private String email;
-  private String password; // hashed!
+  private String password;
   private String role; // "USER" or "ADMIN"
   // constructors, getters, setters
 }

@@ -1,8 +1,7 @@
-package com.example.letsplay.model;
+package com.example.lets_play.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.Instant;
 
 @Document(collection = "products")
 public class Product {
@@ -11,6 +10,6 @@ public class Product {
   private String name;
   private String description;
   private Double price;
-  private Instant createdAt;
+  private String userId;
   // constructors, getters, setters
 }

@@ -21,9 +21,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
             .authorizeHttpRequests()
-            .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // عمومی
-            .requestMatchers("/api/auth/**").permitAll() // ثبت‌نام و لاگین
-            .anyRequest().authenticated() // بقیه نیازمند لاگین
+            .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // public
+            .requestMatchers("/api/auth/**").permitAll() // registration and login
+            .anyRequest().authenticated() // all other requests require authentication
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

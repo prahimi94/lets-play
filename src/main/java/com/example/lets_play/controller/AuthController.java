@@ -1,10 +1,8 @@
 package com.example.lets_play.controller;
 
 import com.example.lets_play.model.User;
-import com.example.lets_play.security.JwtService;
 import com.example.lets_play.service.UserService;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

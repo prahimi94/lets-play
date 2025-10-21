@@ -1,6 +1,9 @@
 package com.example.lets_play.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
@@ -10,44 +13,47 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    // hidden key for signature
-    private static final String SECRET_KEY = "my-secret-key-which-should-be-very-long-for-security";
+    private static final String SECRET_KEY = "ZmFrZXNlY3JldGtleWZha2VzZWNyZXRrZXlmYWtlc2VjcmV0a2V5";
+
+    private static final long EXPIRATION_MS = 1000 * 60 * 60 * 24; // 1 day
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // generate JWT
-    public String generateToken(String username) {
+    // generating token with email and role
+    public String generateToken(String subject, String role) {
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+                .setSubject(subject)          // usually email
+                .claim("role", role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // validate JWT
-    public boolean validateToken(String token, String username) {
-        return extractUsername(token).equals(username) && !isTokenExpired(token);
-    }
-
-    public String extractUsername(String token) {
-        return Jwts.parserBuilder()
+    public String extractEmail(String authHeader) {
+        if (authHeader.startsWith("Bearer ")) {
+            authHeader = authHeader.substring(7);
+        }
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .parseClaimsJws(authHeader)
+                .getBody();
+        return claims.getSubject();
     }
 
-    public boolean isTokenExpired(String token) {
-        return Jwts.parserBuilder()
+    public String extractRole(String authHeader) {
+        if (authHeader.startsWith("Bearer ")) {
+            authHeader = authHeader.substring(7);
+        }
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration()
-                .before(new Date());
+                .parseClaimsJws(authHeader)
+                .getBody();
+        return claims.get("role", String.class);
     }
 }

@@ -2,6 +2,8 @@ package com.example.lets_play.service;
 
 import com.example.lets_play.model.Product;
 import com.example.lets_play.repository.ProductRepository;
+import com.example.lets_play.exception.ResourceNotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,12 +33,13 @@ public class ProductService {
         repository.deleteById(productId);
     }
 
-    public Product updateProduct(String productId, String name, String desc, Double price) {
+    public Product updateProduct(String productId, String name, String desc, Double price, String userId) {
         return repository.findById(productId).map(p -> {
             p.setName(name);
             p.setDescription(desc);
             p.setPrice(price);
+            p.setUserId(userId);
             return repository.save(p);
-        }).orElseThrow(() -> new RuntimeException("Product not found"));
+        }).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 }

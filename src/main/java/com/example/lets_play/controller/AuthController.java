@@ -2,7 +2,9 @@ package com.example.lets_play.controller;
 
 import com.example.lets_play.model.User;
 import com.example.lets_play.service.UserService;
+import com.example.lets_play.dto.LoginRequest;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,8 +24,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        return userService.login(user.getEmail(), user.getPassword());
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+        String token = userService.login(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(token);
     }
 
     // TODO: login و JWT

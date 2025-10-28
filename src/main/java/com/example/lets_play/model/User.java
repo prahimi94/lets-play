@@ -2,14 +2,28 @@ package com.example.lets_play.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.validation.constraints.*;
 
 @Document(collection = "users")
 public class User {
   @Id
   private String id;
+  
+  @NotBlank(message = "Name is required")
+  @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+  @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Name can only contain letters and spaces")
   private String name;
+  
+  @NotBlank(message = "Email is required")
+  @Email(message = "Please provide a valid email address")
+  @Size(max = 100, message = "Email must be less than 100 characters")
   private String email;
+  
+  @NotBlank(message = "Password is required")
   private String password; // hashed
+  
+  @NotBlank(message = "Role is required")
+  @Pattern(regexp = "^(USER|ADMIN)$", message = "Role must be either USER or ADMIN")
   private String role; // "USER" or "ADMIN"
 
   // Constructors

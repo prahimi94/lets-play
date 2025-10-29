@@ -38,7 +38,17 @@ public class UserService {
         return userRepository.findByEmail(query);
     }
 
-    public User registerUser(String name, String email, String rawPassword, String role) {
+    public String registerUser(String name, String email, String rawPassword, String role) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        }
+        String hashed = passwordEncoder.encode(rawPassword);
+        User user = new User(name, email, hashed, role);
+        userRepository.save(user);
+        return jwtService.generateToken(user.getEmail(), user.getRole());
+    }
+
+    public User createUser(String name, String email, String rawPassword, String role) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
@@ -82,6 +92,7 @@ public class UserService {
 
     public void updatePassword(String userId, String oldPassword, String newPassword) {
         // Check if old password is correct
+        System.out.println(oldPassword);
         boolean isOldPasswordCorrect = checkPassword(userId, oldPassword);
         if (!isOldPasswordCorrect) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Old password is incorrect.");
@@ -103,6 +114,11 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(user -> passwordEncoder.matches(rawPassword, user.getPassword()))
                 .orElse(false);
+    }
+
+    public boolean hasAdminUser() {
+        return userRepository.findAll().stream()
+                .anyMatch(user -> "ADMIN".equals(user.getRole()));
     }
 
 }

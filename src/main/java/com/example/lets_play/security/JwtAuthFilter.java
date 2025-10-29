@@ -42,13 +42,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String role = jwtService.extractRole(authHeader);
-            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-            
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(authority));
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                String role = jwtService.extractRole(authHeader);
+                String authority = "ROLE_" + role;
+                
+                // Debug logging
+                System.out.println("🔍 JWT Debug - Email: " + email + ", Role: " + role + ", Authority: " + authority);
+                
+                SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(authority);
+                
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(email, null, Collections.singletonList(grantedAuthority));
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                
+                System.out.println("✅ Authentication set successfully for user: " + email + " with role: " + role);
+            } catch (Exception e) {
+                System.err.println("❌ Error setting authentication: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         filterChain.doFilter(request, response);

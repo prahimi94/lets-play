@@ -57,28 +57,15 @@ public class ProductController {
         return productService.searchProducts(sanitizedQuery);
     }
 
-    // Example of @PostAuthorize usage - checks authorization AFTER method execution
-    // This allows access to the returned product to verify ownership
-    @GetMapping("/{id}")
-    @PostAuthorize("hasRole('ADMIN') or returnObject.userId == authentication.name")
-    public Product getProductById(@PathVariable String id) {
-        // Validate ObjectId format
-        validationService.validateObjectId(id, "Product");
-        
-        // Method executes first, then @PostAuthorize checks if:
-        // - User is ADMIN, OR
-        // - The returned product belongs to the authenticated user
-        return productService.getProductById(id);
-    }
-
     // Another @PostAuthorize example with complex business logic
     // This could be used for products that have different visibility levels
-    @GetMapping("/{id}/details")
+    @GetMapping("/{id}")
     @PostAuthorize("hasRole('ADMIN') or (returnObject.userId == authentication.name) or returnObject.price < 100")
     public Product getProductDetails(@PathVariable String id) {
         validationService.validateObjectId(id, "Product");
         
         // Complex authorization logic:
+        // Method executes first, then @PostAuthorize checks if:
         // - Admin can see all product details
         // - Product owner can see their product details
         // - Regular users can only see details of products under $100
@@ -131,10 +118,12 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @productService.isProductOwner(#id, authentication.name)")
-    public void delete(@PathVariable String id) {
+    public ResponseEntity<String> delete(@PathVariable String id) {
         // Validate ObjectId format
         validationService.validateObjectId(id, "Product");
         
         productService.deleteProduct(id);
+        
+        return ResponseEntity.ok("Product deleted successfully");
     }
 }

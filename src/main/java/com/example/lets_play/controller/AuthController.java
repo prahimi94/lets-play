@@ -7,6 +7,7 @@ import com.example.lets_play.dto.LoginUserRequest;
 import com.example.lets_play.dto.RegisterUserRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -23,11 +24,12 @@ public class AuthController {
 
 
     @PostMapping("/register")
-    public User register(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
         // Additional custom validation
         validationService.validateRegisterUserRequest(registerUserRequest);
-        
-        return userService.registerUser(registerUserRequest.getName(), registerUserRequest.getEmail(), registerUserRequest.getPassword(), "USER");
+
+        String token = userService.registerUser(registerUserRequest.getName(), registerUserRequest.getEmail(), registerUserRequest.getPassword(), "USER");
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/login")
@@ -39,5 +41,17 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
-    // TODO: login و JWT
+    @PostMapping("/register-admin")
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+        // Additional custom validation
+        validationService.validateRegisterUserRequest(registerUserRequest);
+        
+        // Only allow if no admin exists yet (for initial setup)
+        if (userService.hasAdminUser()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Admin already exists");
+        }
+        
+        String token = userService.registerUser(registerUserRequest.getName(), registerUserRequest.getEmail(), registerUserRequest.getPassword(), "ADMIN");
+        return ResponseEntity.ok(token);
+    }
 }

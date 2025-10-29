@@ -73,6 +73,10 @@ public class ValidationService {
         if (inputSanitizer.containsMongoInjection(request.getEmail())) {
             throw new ValidationException("Email contains invalid characters");
         }
+
+        if (inputSanitizer.containsMongoInjection(request.getPassword())) {
+            throw new ValidationException("Password contains invalid characters");
+        }
         
         // Validate password strength (additional check beyond annotation)
         if (request.getPassword() == null || request.getPassword().length() < 8) {

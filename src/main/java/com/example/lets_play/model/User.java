@@ -3,6 +3,7 @@ package com.example.lets_play.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document(collection = "users")
 public class User {
@@ -20,6 +21,7 @@ public class User {
   private String email;
   
   @NotBlank(message = "Password is required")
+  @JsonIgnore
   private String password; // hashed
   
   @NotBlank(message = "Role is required")
@@ -64,5 +66,16 @@ public class User {
   }
   public void setRole(String role) {
       this.role = role;
+  }
+
+  @Override
+  public String toString() {
+      return "User{" +
+              "id='" + id + '\'' +
+              ", name='" + name + '\'' +
+              ", email='" + email + '\'' +
+              ", role='" + role + '\'' +
+              ", password='[PROTECTED]'" +
+              '}';
   }
 }

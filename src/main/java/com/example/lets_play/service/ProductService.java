@@ -39,6 +39,8 @@ public class ProductService {
     }
 
     public void deleteProduct(String productId) {
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         productRepository.deleteById(productId);
     }
 

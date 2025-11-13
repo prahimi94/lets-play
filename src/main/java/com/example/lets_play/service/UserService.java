@@ -3,6 +3,7 @@ package com.example.lets_play.service;
 import com.example.lets_play.exception.ResourceNotFoundException;
 import com.example.lets_play.model.User;
 import com.example.lets_play.repository.UserRepository;
+import com.example.lets_play.repository.ProductRepository;
 import com.example.lets_play.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private ProductRepository productRepository;
     
     @Autowired
     private JwtService jwtService;
@@ -106,8 +110,8 @@ public class UserService {
         userRepository.findById(userId).map(u -> {
             u.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(u);
-            return null; // or return success boolean
-        }).orElseThrow(() -> new ResourceNotFoundException("User not found"));        
+            return true; // or return success boolean
+        }).orElseThrow(() -> new ResourceNotFoundException("User not found2"));        
     }
 
     public boolean checkPassword(String userId, String rawPassword) {
@@ -119,6 +123,33 @@ public class UserService {
     public boolean hasAdminUser() {
         return userRepository.findAll().stream()
                 .anyMatch(user -> "ADMIN".equals(user.getRole()));
+    }
+
+    public void deleteUser(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        
+        // Prevent deletion of the last admin
+        if ("ADMIN".equals(user.getRole())) {
+            long adminCount = userRepository.findAll().stream()
+                    .filter(u -> "ADMIN".equals(u.getRole()))
+                    .count();
+            
+            if (adminCount <= 1) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Cannot delete the last admin user");
+            }
+        }
+        
+        // Delete all products owned by this user
+        // This prevents orphaned products and potential security issues
+        long deletedProductsCount = productRepository.deleteByUserId(userId);
+        
+        if (deletedProductsCount > 0) {
+            System.out.println("Deleted " + deletedProductsCount + " products owned by user: " + user.getEmail());
+        }
+        
+        userRepository.deleteById(userId);
     }
 
 }

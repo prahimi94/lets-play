@@ -2,6 +2,7 @@ package com.example.lets_play.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import jakarta.validation.constraints.*;
 
@@ -10,10 +11,11 @@ public class Product {
     @Id
     private String id;
 
+    @Field("name")
     @NotBlank(message = "Product name is required")
     @Size(min = 2, max = 100, message = "Product name must be between 2 and 100 characters")
     @Pattern(regexp = "^[a-zA-Z0-9\\s\\-_.]+$", message = "Product name contains invalid characters")
-    private String name;
+    private String title;
 
     @NotBlank(message = "Product description is required")
     @Size(min = 10, max = 500, message = "Product description must be between 10 and 500 characters")
@@ -29,8 +31,8 @@ public class Product {
     private String userId;
 
     public Product() {}
-    public Product(String name, String description, Double price, String userId) {
-            this.name = name;
+    public Product(String title, String description, Double price, String userId) {
+            this.title = title;
             this.description = description;
             this.price = price;
             this.userId = userId;
@@ -42,11 +44,11 @@ public class Product {
     public void setId(String id) {
             this.id = id;
     }
-    public String getName() {
-            return name;
+    public String getTitle() {
+            return title;
     }
-    public void setName(String name) {
-            this.name = name;
+    public void setTitle(String title) {
+            this.title = title;
     }
     public String getDescription() {
             return description;

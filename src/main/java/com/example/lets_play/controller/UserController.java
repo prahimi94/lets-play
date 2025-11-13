@@ -9,9 +9,11 @@ import com.example.lets_play.dto.UserProfileResponse;
 import com.example.lets_play.dto.UserResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -75,7 +77,7 @@ public class UserController {
         return ResponseEntity.ok("Password updated successfully.");
     }
 
-        @GetMapping("/me")
+    @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileResponse> getCurrentUser(
             @RequestHeader("Authorization") String authHeader) {
@@ -122,6 +124,37 @@ public class UserController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<String> adminTest() {
         return ResponseEntity.ok("✅ hasAuthority('ROLE_ADMIN') works!");
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> deleteUser(@PathVariable String id,
+            @RequestHeader("Authorization") String authHeader) {
+        
+        try {
+            // Get current admin user info
+            User currentUser = userService.getUserFromToken(authHeader);
+            
+            // Prevent admin from deleting themselves
+            if (currentUser.getId().equals(id)) {
+                return ResponseEntity.badRequest().body("You cannot delete your own account");
+            }
+            
+            // Get user to be deleted for logging
+            User userToDelete = userService.getUserById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Delete the user
+            userService.deleteUser(id);
+            
+            // Log the deletion
+            System.out.println("Admin " + currentUser.getEmail() + " deleted user: " + userToDelete.getEmail());
+            
+            return ResponseEntity.ok("User deleted successfully: " + userToDelete.getName());
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting user: " + e.getMessage());
+        }
     }
 }
 

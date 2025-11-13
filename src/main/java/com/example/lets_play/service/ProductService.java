@@ -25,7 +25,7 @@ public class ProductService {
     }
 
     public List<Product> searchProducts(String query) {
-        return productRepository.findByNameContainingIgnoreCase(query);
+        return productRepository.findByTitleContainingIgnoreCase(query);
     }
 
     public Product getProductById(String productId) {
@@ -46,7 +46,7 @@ public class ProductService {
 
     public Product updateProduct(String productId, String name, String desc, Double price, String userId) {
         return productRepository.findById(productId).map(p -> {
-            p.setName(name);
+            p.setTitle(name);
             p.setDescription(desc);
             p.setPrice(price);
             p.setUserId(userId);

@@ -52,6 +52,48 @@ docker-compose up -d
 
 The API will be available at `http://localhost:8080`
 
+## 🔒 HTTPS Configuration
+
+### Development (HTTP)
+By default, the application runs on HTTP for development:
+```bash
+./mvnw spring-boot:run
+```
+Available at: `http://localhost:8080`
+
+### Production (HTTPS)
+
+#### 1. Generate SSL Certificate
+```bash
+./generate-ssl.sh
+```
+
+#### 2. Run with HTTPS
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+Available at: `https://localhost:8443`
+
+#### 3. Configuration Options
+
+**Environment Variables:**
+- `APP_ENFORCE_HTTPS=true` - Force HTTPS redirects
+- `SERVER_PORT=8443` - HTTPS port
+- `SERVER_SSL_KEY_STORE_PASSWORD=your_password` - Keystore password
+
+**Production Deployment:**
+1. Replace the self-signed certificate with a real SSL certificate
+2. Set `app.enforce-https=true` in production
+3. Configure your reverse proxy (nginx/Apache) for SSL termination
+
+#### 4. Security Headers
+When HTTPS is enabled, the following security headers are automatically added:
+- `Strict-Transport-Security`: Forces HTTPS for 1 year
+- `Content-Security-Policy: upgrade-insecure-requests`: Upgrades HTTP to HTTPS
+- `X-Frame-Options: DENY`: Prevents clickjacking
+- `X-Content-Type-Options: nosniff`: Prevents MIME sniffing
+- `X-XSS-Protection`: XSS protection
+
 ### 4. Default Admin User
 On first startup, a default admin user is automatically created:
 - **Email**: `admin@letsplay.com`
